@@ -1,6 +1,18 @@
 // First, create a `logos` lexer:
 
+#[derive(Clone, Debug, Default, PartialEq, thiserror::Error)]
+enum Error {
+    #[default]
+    #[error("none")]
+    None,
+
+    #[error(transparent)]
+    ParseInt(#[from] std::num::ParseIntError),
+}
+
 #[derive(Clone, Debug, PartialEq, Eq, logos::Logos)]
+#[logos(skip r"[ \t\n\f]+")]
+#[logos(error = Error)]
 enum Token {
     #[token("+")]
     Plus,
@@ -10,10 +22,6 @@ enum Token {
 
     #[regex(r"-?[0-9]+", |lex| lex.slice().parse())]
     Number(i64),
-
-    #[error]
-    #[regex(r"[ \t\n\f]+", logos::skip)]
-    Error,
 }
 
 // Then, write a nom parser that accepts a `Tokens<'_, Token>` as input:

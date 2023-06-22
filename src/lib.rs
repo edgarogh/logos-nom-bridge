@@ -172,7 +172,7 @@ where
         self.len() == 0
     }
 
-    pub fn peek(&self) -> Option<(T, &'i str)> {
+    pub fn peek(&self) -> Option<(Result<T, T::Error>, &'i str)> {
         let mut iter = self.lexer.clone().spanned();
         iter.next().map(|(t, span)| (t, &self.lexer.source()[span]))
     }
@@ -235,7 +235,7 @@ impl<'i, T> Iterator for IndexIterator<'i, T>
 where
     T: Logos<'i>,
 {
-    type Item = (usize, (T, Span));
+    type Item = (usize, (Result<T, T::Error>, Span));
 
     fn next(&mut self) -> Option<Self::Item> {
         self.logos.next().map(|t| {
@@ -250,7 +250,7 @@ where
     T: Logos<'i, Source = str> + Clone,
     T::Extras: Default + Clone,
 {
-    type Item = (T, Span);
+    type Item = (Result<T, T::Error>, Span);
 
     type Iter = IndexIterator<'i, T>;
 

@@ -104,7 +104,17 @@ macro_rules! token_parser {
                 $error_ty,
             > {
                 match $input.peek() {
-                    ::std::option::Option::Some((__token, __s)) if __token == *self => {
+                    ::std::option::Option::Some((::std::result::Result::Err(__err), _)) => {
+                        ::std::result::Result::Err(::nom::Err::Error(
+                            ::nom::error::FromExternalError::from_external_error(
+                                $input,
+                                ::nom::error::ErrorKind::Alt,
+                                __err,
+                            ),
+                        ))
+                    }
+                    ::std::option::Option::Some((std::result::Result::Ok(__token), __s))
+                        if __token == *self => {
                         ::std::result::Result::Ok(($input.advance(), __s))
                     }
                     _ => {
@@ -249,7 +259,18 @@ macro_rules! data_variant_parser {
             $error_ty,
         > {
             match $input.peek() {
-                ::std::option::Option::Some(($type::$variant $data, _)) => {
+                ::std::option::Option::Some((::std::result::Result::Err(__err), _)) => {
+                    ::std::result::Result::Err(::nom::Err::Error(
+                        ::nom::error::FromExternalError::from_external_error(
+                            $input,
+                            ::nom::error::ErrorKind::Alt,
+                            __err,
+                        ),
+                    ))
+                }
+                ::std::option::Option::Some((::std::result::Result::Ok(
+                    $type::$variant $data
+                ), _)) => {
                     Ok(($input.advance(), $res))
                 }
                 _ => ::std::result::Result::Err(::nom::Err::Error($error)),
